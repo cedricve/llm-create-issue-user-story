@@ -33,6 +33,8 @@ on:
 jobs:
   create-issue:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Create Issue with User Story
         uses: cedricve/llm-create-issue-user-story@main
@@ -63,6 +65,8 @@ on:
 jobs:
   create-issue:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Create Issue with User Story
         uses: cedricve/llm-create-issue-user-story@main

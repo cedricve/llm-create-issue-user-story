@@ -34,6 +34,8 @@ on:
 jobs:
   create-user-story-issue:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Create Issue with LLM-Generated User Story
         uses: cedricve/llm-create-issue-user-story@main
