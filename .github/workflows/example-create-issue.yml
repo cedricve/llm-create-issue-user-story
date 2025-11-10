@@ -41,7 +41,10 @@ jobs:
         uses: cedricve/llm-create-issue-user-story@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          azure_openai_api_key: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          azure_openai_endpoint: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          azure_openai_version: '2024-02-15-preview'
+          openai_model: 'gpt-4'
           issue_title: ${{ github.event.inputs.issue_title }}
           issue_description: ${{ github.event.inputs.issue_description }}
           complexity: ${{ github.event.inputs.complexity }}
