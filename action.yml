@@ -1,0 +1,62 @@
+name: 'Create GitHub Issue with LLM-Generated User Story'
+description: "Create a GitHub issue with a complete user story generated using (Azure) OpenAI and ChatGPT."
+inputs:
+  github_token:
+    description: 'GitHub token for authentication.'
+    required: true
+  openai_api_key:
+    description: 'API key for OpenAI services.'
+    required: false
+    default: ''
+  azure_openai_api_key:
+    description: 'API key for Azure OpenAI services.'
+    required: false
+    default: ''
+  openai_model:
+    description: 'OpenAI model for chat/completions endpoint.'
+    required: false
+    default: 'gpt-4o-mini'
+  azure_openai_endpoint:
+    description: 'Azure OpenAI endpoint URL.'
+    required: false
+    default: ''
+  azure_openai_version:
+    description: 'Azure OpenAI API version.'
+    required: false
+    default: ''
+  issue_title:
+    description: 'Title for the GitHub issue.'
+    required: true
+  issue_description:
+    description: 'Brief description of the feature or user story to generate.'
+    required: true
+  complexity:
+    description: 'Complexity level of the user story (e.g., Low, Medium, High).'
+    required: false
+    default: 'Medium'
+  duration:
+    description: 'Estimated duration for the user story (e.g., 1 day, 1 week, 2 weeks).'
+    required: false
+    default: '1 week'
+  max_tokens:
+    description: 'Max number of tokens for the prompt.'
+    required: false
+    default: '2000'
+  temperature:
+    description: 'Model creativity level (higher = more creative).'
+    required: false
+    default: '0.7'
+  labels:
+    description: 'Comma-separated list of labels to add to the issue.'
+    required: false
+    default: ''
+  assignees:
+    description: 'Comma-separated list of GitHub usernames to assign to the issue.'
+    required: false
+    default: ''
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'file-text'
+  color: 'blue'

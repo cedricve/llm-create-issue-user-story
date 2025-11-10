@@ -1,0 +1,51 @@
+name: Example - Create User Story Issue
+on:
+  workflow_dispatch:
+    inputs:
+      issue_title:
+        description: 'Title for the issue'
+        required: true
+        default: 'Implement user authentication'
+      issue_description:
+        description: 'Brief description of the feature'
+        required: true
+        default: 'Add user login and registration functionality with JWT tokens'
+      complexity:
+        description: 'Complexity level'
+        required: false
+        default: 'Medium'
+        type: choice
+        options:
+          - Low
+          - Medium
+          - High
+      duration:
+        description: 'Estimated duration'
+        required: false
+        default: '1 week'
+        type: choice
+        options:
+          - 1 day
+          - 3 days
+          - 1 week
+          - 2 weeks
+          - 1 month
+
+jobs:
+  create-user-story-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create Issue with LLM-Generated User Story
+        uses: cedricve/llm-create-issue-user-story@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          issue_title: ${{ github.event.inputs.issue_title }}
+          issue_description: ${{ github.event.inputs.issue_description }}
+          complexity: ${{ github.event.inputs.complexity }}
+          duration: ${{ github.event.inputs.duration }}
+          labels: 'user-story,enhancement'
+          max_tokens: 2000
+          temperature: 0.7
