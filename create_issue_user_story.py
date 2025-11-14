@@ -82,7 +82,8 @@ def extract_title_from_response(response_text):
     """
     lines = response_text.strip().split('\n')
     
-    for line in lines:
+    # Only check the first few lines for the title (avoid false positives in body)
+    for i, line in enumerate(lines[:5]):
         # Check for markdown header (# Title)
         if line.strip().startswith('# '):
             return line.strip()[2:].strip()
@@ -90,10 +91,14 @@ def extract_title_from_response(response_text):
         if line.lower().startswith('title:'):
             return line.split(':', 1)[1].strip()
     
-    # Fallback: use the first non-empty line as title
-    for line in lines:
+    # Fallback: use the first non-empty line as title (without stripping markdown headers)
+    for line in lines[:5]:
         if line.strip():
-            return line.strip().lstrip('#').strip()
+            # Only strip a single '#' if it's at the start (level 1 header)
+            stripped = line.strip()
+            if stripped.startswith('# ') and not stripped.startswith('##'):
+                return stripped[2:].strip()
+            return stripped
     
     return "User Story"  # Ultimate fallback
 
@@ -105,13 +110,13 @@ def extract_body_from_response(response_text):
     """
     lines = response_text.strip().split('\n')
     
-    # Find and skip the title line
-    for i, line in enumerate(lines):
+    # Find and skip the title line (only check first few lines)
+    for i, line in enumerate(lines[:5]):
         if line.strip().startswith('# ') or line.lower().startswith('title:'):
             # Return everything after the title line
             return '\n'.join(lines[i+1:]).strip()
     
-    # If no title found, return the whole response
+    # If no title found in first few lines, return the whole response
     return response_text.strip()
 
 
