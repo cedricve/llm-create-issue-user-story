@@ -78,27 +78,81 @@ def extract_title_from_response(response_text):
     """
     Extract the title from the LLM response.
     Expected format: # Title\n or Title:\n at the beginning of the response.
-    Falls back to first line if no markdown header is found.
+    Rejects generic placeholders like "Title" or bracketed template text.
+    Falls back to first line if no proper title is found.
     """
     lines = response_text.strip().split('\n')
+    
+    # Generic placeholders that should be rejected
+    INVALID_TITLES = {
+        'title',
+        '[a concise, descriptive title for the user story]',
+        '[title]',
+        'user story',
+    }
+    
+    def is_valid_title(text):
+        """Check if extracted title is valid (not a placeholder)."""
+        cleaned = text.strip().lower()
+        
+        # Reject empty or very short titles
+        if len(cleaned) < 2:
+            return False
+        
+        # Reject known placeholders
+        if cleaned in INVALID_TITLES:
+            return False
+        
+        # Reject text in brackets (template format)
+        if cleaned.startswith('[') and cleaned.endswith(']'):
+            return False
+        
+        # Reject single generic words
+        if cleaned in ['title', 'name', 'heading', 'header']:
+            return False
+        
+        return True
     
     # Only check the first few lines for the title (avoid false positives in body)
     for i, line in enumerate(lines[:5]):
         # Check for markdown header (# Title)
-        if line.strip().startswith('# '):
-            return line.strip()[2:].strip()
+        if line.strip().startswith('# ') and not line.strip().startswith('##'):
+            title_text = line.strip()[2:].strip()
+            if is_valid_title(title_text):
+                return title_text
+        
         # Check for "Title:" format
         if line.lower().startswith('title:'):
-            return line.split(':', 1)[1].strip()
+            title_text = line.split(':', 1)[1].strip()
+            if is_valid_title(title_text):
+                return title_text
     
-    # Fallback: use the first non-empty line as title (without stripping markdown headers)
+    # Fallback: use the first non-empty line as title if it's valid
     for line in lines[:5]:
         if line.strip():
-            # Only strip a single '#' if it's at the start (level 1 header)
             stripped = line.strip()
-            if stripped.startswith('# ') and not stripped.startswith('##'):
-                return stripped[2:].strip()
-            return stripped
+            # Skip markdown headers at this point
+            if stripped.startswith('#'):
+                continue
+            # Skip lines that look like labels (Title:, Name:, etc.)
+            if ':' in stripped:
+                continue
+            if is_valid_title(stripped):
+                return stripped
+    
+    # Ultimate fallback: extract from User Story section or description
+    for i, line in enumerate(lines):
+        if '## user story' in line.lower() and i + 1 < len(lines):
+            # Try to extract a meaningful phrase from the user story
+            next_line = lines[i + 1].strip()
+            if next_line.startswith('As a'):
+                # Try to extract goal from "As a [user], I want [goal]..."
+                parts = next_line.split('I want')
+                if len(parts) > 1:
+                    goal = parts[1].split('so that')[0].strip()
+                    # Create title from goal (limit to ~50 chars)
+                    if goal and len(goal) > 5:
+                        return goal[:50].strip() if len(goal) > 50 else goal.strip()
     
     return "User Story"  # Ultimate fallback
 
