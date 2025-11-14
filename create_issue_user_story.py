@@ -8,6 +8,9 @@ from openai import AzureOpenAI, OpenAI
 SAMPLE_PROMPT = """
 Generate a detailed user story for a software development task with the following structure:
 
+# Title
+[A concise, descriptive title for the user story]
+
 ## User Story
 As a [type of user], I want [goal] so that [benefit].
 
@@ -30,6 +33,8 @@ As a [type of user], I want [goal] so that [benefit].
 """
 
 GOOD_SAMPLE_RESPONSE = """
+# Implement User Authentication System
+
 ## User Story
 As a developer, I want to implement user authentication so that users can securely access their accounts.
 
@@ -67,6 +72,47 @@ As a developer, I want to implement user authentication so that users can secure
 COMPLETION_PROMPT = """
 Based on the provided information, generate a comprehensive user story following the structure above.
 """
+
+
+def extract_title_from_response(response_text):
+    """
+    Extract the title from the LLM response.
+    Expected format: # Title\n or Title:\n at the beginning of the response.
+    Falls back to first line if no markdown header is found.
+    """
+    lines = response_text.strip().split('\n')
+    
+    for line in lines:
+        # Check for markdown header (# Title)
+        if line.strip().startswith('# '):
+            return line.strip()[2:].strip()
+        # Check for "Title:" format
+        if line.lower().startswith('title:'):
+            return line.split(':', 1)[1].strip()
+    
+    # Fallback: use the first non-empty line as title
+    for line in lines:
+        if line.strip():
+            return line.strip().lstrip('#').strip()
+    
+    return "User Story"  # Ultimate fallback
+
+
+def extract_body_from_response(response_text):
+    """
+    Extract the body (everything except the title) from the LLM response.
+    Removes the title line from the response.
+    """
+    lines = response_text.strip().split('\n')
+    
+    # Find and skip the title line
+    for i, line in enumerate(lines):
+        if line.strip().startswith('# ') or line.lower().startswith('title:'):
+            # Return everything after the title line
+            return '\n'.join(lines[i+1:]).strip()
+    
+    # If no title found, return the whole response
+    return response_text.strip()
 
 
 def main():
@@ -247,11 +293,18 @@ Please generate a complete user story that addresses this requirement.
 
     print(f"Generated user story:\n{generated_user_story}")
 
+    # Extract title and body from the generated response
+    extracted_title = extract_title_from_response(generated_user_story)
+    extracted_body = extract_body_from_response(generated_user_story)
+    
+    print(f"\nExtracted title: {extracted_title}")
+    print(f"Using LLM-generated title instead of user-provided title: '{issue_title}'")
+
     # Create the GitHub issue
     issue_url = f"{github_api_url}/repos/{repo}/issues"
     issue_data = {
-        "title": issue_title,
-        "body": generated_user_story,
+        "title": extracted_title,
+        "body": extracted_body,
     }
 
     # Add labels if provided
