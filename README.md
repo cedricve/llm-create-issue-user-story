@@ -14,6 +14,7 @@ This GitHub Action automatically creates GitHub issues with comprehensive user s
 - **Auto-Labeling**: Automatically add labels to created issues
 - **Auto-Assignment**: Assign issues to team members automatically
 - **Flexible AI Provider**: Supports both OpenAI and Azure OpenAI
+- **Model Router Compatible**: Works with Azure AI model router and similar proxies
 
 ## Usage
 
@@ -99,8 +100,8 @@ jobs:
 | `issue_description` | Brief description of the feature or user story | Yes | - |
 | `complexity` | Complexity level (e.g., Low, Medium, High) | No | `Medium` |
 | `duration` | Estimated duration (e.g., 1 day, 1 week, 2 weeks) | No | `1 week` |
-| `max_tokens` | Max number of tokens for the prompt | No | `2000` |
-| `temperature` | Model creativity level (0.0-2.0, higher = more creative) | No | `0.7` |
+| `max_tokens` | Max number of completion tokens | No | `2000` |
+| `temperature` | Model creativity level (0.0-2.0, higher = more creative). Note: not passed to the API for model-router compatibility. | No | `0.6` |
 | `labels` | Comma-separated list of labels to add to the issue | No | '' |
 | `assignees` | Comma-separated list of GitHub usernames to assign | No | '' |
 

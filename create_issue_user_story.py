@@ -219,6 +219,13 @@ def main():
         help="The Azure OpenAI API version",
     )
     parser.add_argument(
+        "--openai-model",
+        type=str,
+        required=False,
+        default="gpt-4o-mini",
+        help="The OpenAI model to use",
+    )
+    parser.add_argument(
         "--issue-title",
         type=str,
         required=True,
@@ -275,9 +282,9 @@ def main():
     labels = args.labels
     assignees = args.assignees
 
-    open_ai_model = os.environ.get("INPUT_OPENAI_MODEL", "gpt-4o-mini")
+    open_ai_model = args.openai_model
     max_prompt_tokens = int(os.environ.get("INPUT_MAX_TOKENS", "2000"))
-    model_temperature = float(os.environ.get("INPUT_TEMPERATURE", "0.7"))
+    model_temperature = float(os.environ.get("INPUT_TEMPERATURE", "0.6"))
 
     authorization_header = {
         "Accept": "application/vnd.github.v3+json",
@@ -319,8 +326,7 @@ Please generate a complete user story that addresses this requirement.
                 {"role": "assistant", "content": GOOD_SAMPLE_RESPONSE},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=model_temperature,
-            max_tokens=max_prompt_tokens,
+            max_completion_tokens=max_prompt_tokens,
         )
         generated_user_story = openai_response.choices[0].message.content
 
@@ -342,8 +348,7 @@ Please generate a complete user story that addresses this requirement.
                 {"role": "assistant", "content": GOOD_SAMPLE_RESPONSE},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=model_temperature,
-            max_tokens=max_prompt_tokens,
+            max_completion_tokens=max_prompt_tokens,
         )
         generated_user_story = azure_openai_response.choices[0].message.content
     else:

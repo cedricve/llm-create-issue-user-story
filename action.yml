@@ -45,7 +45,7 @@ inputs:
   temperature:
     description: 'Model creativity level (higher = more creative).'
     required: false
-    default: '0.7'
+    default: '0.6'
   labels:
     description: 'Comma-separated list of labels to add to the issue.'
     required: false
